@@ -1,0 +1,2394 @@
+4714 IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS, VOL. 60, NO. 10, OCTOBER 2013
+An Intelligent Particle Swarm Optimization for
+Short-Term Traffic Flow Forecasting
+Using on-Road Sensor Systems
+Kit Yan Chan, Member, IEEE, Tharam S. Dillon, Life Fellow, IEEE, and Elizabeth Chang, Senior Member, IEEE
+Abstract—On-road sensor systems installed on freeways are
+used to capture traffic flow data for short-term traffic flow pre-
+dictors for traffic management, to reduce traffic congestion and
+improve vehicular mobility. This paper intends to tackle the im-
+practical time-invariant assumptions which underlie the methods
+currently used to develop short-term traffic flow predictors: 1) the
+characteristics of current data captured by on-road sensors are
+assumed to be time invariant with respect to those of the historical
+data, which is used to developed short-term traffic flow predictors;
+and 2) the configuration of the on-road sensor systems is assumed
+to be time-invariant. In fact, both assumptions are impractical
+in the real world, as the current traffic flow characteristics can
+be very different from the historical ones, and also the on-road
+sensor systems are time varying in nature due to damaged sensors
+or component wear. Therefore, misleading forecasting results are
+likely to be produced when short-term traffic flow predictors are
+designed using these two time-invariant assumptions. To tackle
+these time-invariant assumptions, an intelligent particle swarm
+optimization (IPSO) algorithm is proposed to develop short-term
+traffic flow predictors by integrating the mechanisms of PSO,
+neural network and fuzzy inference system, to adapt to the time-
+varying traffic flow characteristics and the time-varying config-
+urations of the on-road sensor systems. The proposed IPSO was
+applied to forecast traffic flow conditions on a section of freeway in
+Western Australia, whose traffic flow information can be captured
+on-line by the on-road sensor system. These results clearly demon-
+strate the effectiveness of using the proposed IPSO for real-time
+traffic flow forecasting based on traffic flow data captured by
+on-road sensor systems.
+Index Terms—Fuzzy inference system, neural networks (NNs),
+particle swarm optimization (PSO), sensor data, sensor systems,
+time-varying systems, traffic contingency, traffic flow forecasting.
+I. INTRODUCTION
+O
+N-ROAD sensor systems installed on freeways provide
+traffic flow data for the development and implementation
+of short-term traffic flow predictors, which aim to forecast
+Manuscript received December 12, 2011; revised April 16, 2012 and July 5,
+2012; accepted August 2, 2012. Date of publication August 16, 2012; date of
+current version May 16, 2013.
+K. Y. Chan is with the Department of Electrical and Computer Engineering,
+Curtin University, Perth, WA 6845, Australia (e-mail: kit.chan@curtin.edu.au).
+T. S. Dillon is with the Department of Computer Science and Computer
+Engineering, La Trobe University, Melbourne, Vic 3086, Australia (e-mail:
+tharam.dillon@cbs.curtin.edu.au).
+E. Chang is with the School of Information Systems, Curtin University,
+Perth, WA 6845, Australia (e-mail: elizabeth.chang@cbs.curtin.edu.au).
+Color versions of one or more of the figures in this paper are available online
+at http://ieeexplore.ieee.org.
+Digital Object Identifier 10.1109/TIE.2012.2213556
+likely traffic flow conditions in the short-term, typically within
+ten minutes ahead [42]. This short-term forecasting informa-
+tion can be used to assist proactive traffic control centers to
+anticipate traffic congestion and improve the mobility of trans-
+portation [48]. To develop short-term traffic flow predictors,
+historical traffic flow data is first collected using the on-road
+sensor systems installed on a section of the freeway under
+investigation. Then, the short-term traffic flow predictors can
+be developed based on conventional statistical methods such as
+filtering techniques [37], [41], autoregressive integrated moving
+average (ARIMA) methods [50], statistical regression [43]
+and k-nearest-neighbor approaches [10], as found in the past
+literature. With the developed short-term traffic flow predictors,
+future traffic flow conditions can be forecast based on the
+current traffic flow conditions, which are captured on-line using
+the on-road sensor systems.
+Even if traffic flow predictors developed by such statistical
+methods can obtain reasonable prediction accuracy for future
+traffic flow conditions, the predictors developed by these meth-
+ods may not be able to address the strongly nonlinear charac-
+teristics of short-term traffic flow. To address this issue, another
+recently used modeling or prediction approach, namely support
+vector regression [17]–[20], have been applied to develop short-
+term traffic flow predictors, which can obtain forecasting results
+with better accuracies than ARIMA. Also, a lot of research has
+been conducted by applying the artificial intelligent approach,
+namely neural networks (NNs) [9], [32]–[34] to develop short-
+term traffic flow predictors [11], [12], [25], which can obtain
+forecasting results with better accuracies than can statistical
+methods. Recent research involving NNs has been focusing
+mainly on enhancing the generalization capability of NNs
+by developing hybrid NNs, which incorporate other artificial
+intelligence techniques or statistical forecasting methods, such
+as fuzzy systems [15], [40], [44], [51], Kalman filter [37], fuzzy
+clustering method [45], and the autoregression moving average
+method [46], etc. These hybrid NNs can achieve more accurate
+predictions than those achieved by using NNs.
+However, the development of all these approaches is sub-
+ject to two common but impractical assumptions: 1) that the
+characteristics of collected historical traffic flow data are time
+invariant with respect to the current traffic flow characteristics.
+In fact, the time-varying aspects of traffic flow are unavoidable.
+Therefore, they are likely to produce misleading traffic flow
+forecasting on current road conditions, if the characteristics of
+the historical traffic flow data are very different from those of
+0278-0046/$31.00 © 2012 IEEE
+CHAN et al.: INTELLIGENT PARTICLE SWARM OPTIMIZATION FOR SHORT-TERM TRAFFIC FLOW FORECASTING 4715
+the newly acquired traffic flow data captured on-line by the
+on-road sensor systems; and 2) that the configuration of the on-
+road sensor system is time invariant; the configurations of the
+traffic flow predictors are pre-defined based on this assumption.
+In fact, this is not always true, and it is unwise to assume
+that all on-road sensors can work properly all of the time, as
+the performance of the on-road sensors may deteriorate over
+time, due to component wear. Also, some on-road sensors are
+likely to be damaged in very poor weather conditions such as
+rainstorm or flood. Therefore, misleading forecasting results are
+likely to be produced by the traffic flow predictors, which are
+designed under these two time-invariant assumptions.
+To tackle these two time-invariant assumptions, a hybrid
+NN approach integrated with the particle swarm optimization
+(PSO) approach, namely intelligent PSO (IPSO), is proposed.
+The IPSO uses the particles in the swarm to represent the NNs
+which are used to forecast the short-term traffic flow, without
+making these two time-invariant assumptions. The IPSO has the
+following three main features:
+1) Flexible NN structure: In the IPSO, each particle is
+represented by a three-layer NN, where switches are
+configured between links of neural nodes, to determine
+both the optimal NN structures and the parameters which
+vary with respect to time [26]. Each particle consists of
+two parts: the integer string and the hierarchical string
+[47]. The integer string is used to represent the NN
+parameters. The hierarchical string is used to represent
+the NN structure. It is represented by the open/close
+actions of a number of switches which link the neural
+nodes. When the switch is closed, the link between the
+corresponding neural nodes exists. However, the link
+does not exist when the switch is opened. Based on this
+particle representation, both optimal NN structures and
+parameters can be adapted to newly captured traffic flow
+data or time-varying configurations of on-road sensor
+systems. Also, the IPSO can automatically determine the
+optimal structures of NNs without involving trial and er-
+ror methods. This is intended to overcome the limitations
+of the existing NN approaches [1], [11], [12], [25], [27]
+for traffic flow forecasting in which the NN structure has
+to be fixed and cannot be adapted with time.
+2) Active particle movement: In IPSO, the particle move-
+ment of classical PSO (CPSO) [23], is used, inspired by
+the social behaviors of animals. The particle movement is
+used to adapt to the optimal NN parameters and structures
+for short-term traffic flow forecasting, which is time
+varying, since the particle movement can effectively tune
+the real-time adaptive controllers for many time-varying
+systems, including the Maglev transportation system [53]
+and generator system for power applications [28]. This
+mechanism can also be applied for NN design effectively
+[29]–[31]. Also, Chan et al. [8] demonstrated that the
+particle movement can effectively adapt optimal struc-
+tures and parameters of time-varying systems, where the
+parameters and the structures of the systems vary with
+time. Based on the particle movement, the IPSO intends
+to automatically and effectively tune both the parameters
+Fig. 1. NN for short-term traffic flow forecasting on the freeway.
+and the structures of the NNs, to obtain an optimal short-
+term traffic flow forecasting, which is time-varying.
+3) Further enhancement of particle movement:Inthe
+CPSO [23], the diversity of the solutions is likely to be
+lost when a solution with certain good quality is obtained.
+Hence, the CPSO is likely to be trapped into this solu-
+tion, and no further progress in terms of better solutions
+can be made. To further assist the proposed IPSO to
+search for better solutions, activating components can
+be injected into the particles to increase the diversity
+of the particles [52]. In the IPSO, a mechanism based
+on a fuzzy intelligence system is designed, to maintain
+the diversity of particles by artificially injecting them
+with activating components. It monitors the traffic flow
+accuracies obtained by the IPSO and the changing rates of
+the traffic flow accuracies. When the traffic flow accuracy
+is low or the traffic flow accuracy decreases sharply, more
+activating components are injected into the particles. This
+is intended to prevent particles prematurely converging to
+solutions with poor traffic flow accuracies and helps the
+IPSO to move the poor particles from a region with poor
+traffic flow accuracies to a better region.
+Comparisons were conducted based on the IPSO and the
+other existing methods to develop NNs for short-term traffic
+flow forecasting on the Mitchell freeway in Western Australia,
+where an on-road sensor system with many on-road sensors has
+been installed to capture traffic flow data at different locations
+on the freeway. The results show that better accuracies in short-
+term traffic flow forecasting can be obtained by using the IPSO
+compared with those obtained by other tested methods. The
+rest of the paper is organized as follows. Section II shows
+the configuration of the NN for short-term traffic flow fore-
+casting. Section III discusses the mechanisms of the IPSO.
+Section IV presents and discusses the results obtained by IPSO
+and the other tested algorithms for forecasting short-term traffic
+flow conditions on the Mitchell freeway in Western Australia.
+Section V concludes the paper.
+II. NNS FOR SHORT-TERM TRAFFIC FLOW FORECASTING
+To forecast future traffic flow conditions at location A il-
+lustrated in Fig. 1, a short-term traffic flow predictor was
+developed based on traffic flow data collected by the n on-
+road sensors (D
+1
+, D
+2
+,..., and D
+n
+). D
+i
+captures the traffic flow
+4716 IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS, VOL. 60, NO. 10, OCTOBER 2013
+condition, y
+i
+(t), at time t with a sampling time of T
+s
+, where
+the traffic flow conditions can be reflected by average speed of
+vehicles. In general, the traffic flow on the freeway is smooth, if
+the average speed of the vehicles approximates the speed limit
+of the freeway and the density of vehicles is low.
+In this paper, a three-layer NN is used to forecast future
+traffic flow conditions at location A, ˆy
+n
+(t+mT
+s
+), with m
+sampling time ahead, based on (1)
+ˆy
+n
+(t+mT
+s
+)
+= δ(s
+0
+(t))α
+0
+(t)
++
+N
+h
+summationdisplay
+j=1
+bracketleftBigg
+δ(s
+j
+(t))β
+j
+(t)
+·Ψ
+parenleftBigg
+δ(s
+j,0
+(t))γ
+j,0
+(t)+
+n
+summationdisplay
+k=1
+p
+summationdisplay
+i=0
+δ(s
+j,i,k
+(t))
+×γ
+j,i,k
+(t)y
+k
+(t−iT
+s
+)
+parenrightBiggbracketrightBiggvextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+¯
+W(t)
+(1)
+where
+¯
+W(t) is the NN parameters, denoted by (2) as follows:
+¯
+W(t)=[α
+0
+(t),β
+j
+(t),γ
+j,0
+(t),γ
+j,i,k
+(t),s
+0
+(t),s
+j
+(t),s
+j,0
+(t),
+s
+j,i,k
+(t) with i=0,1,...,p;j=1,2,...,N
+h
+;k=1,2,...,n]
+(2)
+y
+k
+(t−i·T
+s
+) is the traffic flow condition captured by D
+k
+at
+time(t−iT
+s
+)withi =1,2,...,p;α
+0
+(t)denotes the weight of
+the bias of the output node at time t; β
+j
+(t) denotes the weight
+on the link from the jth hidden node to the output node at
+time t; γ
+j,0
+(t) denotes the weight of the bias of the jth hidden
+node at time t; γ
+j,i,k
+(t) denotes the weight on the link from
+the input node for y
+k
+(t−i·T
+s
+) to the jth hidden node; Ψ(.)
+is the transfer function of the hidden node. Here, the sigmoid
+function is used, as it can achieve satisfactory results for traffic
+flow forecasting [1]; s
+0
+(t) denotes the parameter for the link
+switch from the bias node to the output node; s
+j
+(t) denotes the
+one from thejth hidden node to the output node;s
+j,0
+(t)denotes
+the one from the bias node to the jth hidden node; and s
+j,i,k
+(t)
+denotes the one from the input node, y
+k
+(t−iT
+s
+),tothejth
+hidden node; δ(α) is a link switch between two nodes, which is
+defined by an unit step function as
+δ(α)=
+braceleftbigg
+0, if α<0
+1, if α ≥ 0
+where α ∈ R. (3)
+The use of these link switches overcomes the limitations of
+the commonly used fixed-connected NNs, where all nodes are
+restricted by a fixed configuration, and the structure of the NN
+cannot be adapted with respect to newly captured data [26].
+As shown in Fig. 2, the NN parameters,
+¯
+W(t), are de-
+termined by two stages namely, off-line training and on-line
+adaption. Off-line training is defined for the time t before
+T
+oﬀ−line
+(i.e., t<T
+oﬀ−line
+), and on-line adaption is defined for
+the time t after T
+oﬀ−line
+(i.e., t>T
+oﬀ−line
+), where T
+oﬀ−line
+is
+the switching time between the off-line training and the on-line
+adaption. Foroff-linetraining,
+¯
+W(t)ispre-determinedbasedon
+Fig. 2. Illustration of pre-determining and adapting the neural network
+parameters.
+the past collected traffic flow data. For on-line adaption,
+¯
+W(t)
+is adapted with the traffic flow data which is captured on-line
+from the freeway. Detailed description for off-line training, on-
+line adaption, and the error function for both states are given as
+following.
+A. Off-Line Training
+For off-line training (i.e., t<T
+oﬀ−line
+),
+¯
+W(t) is initial-
+ized by a set of collected N
+hist
+pieces of historical traf-
+fic flow data, Π
+hist
+(t), where Π
+hist
+(t)={
+¯
+Y(t(i)) with i =
+1,2,...,N
+hist
+and t(i) <T
+oﬀ−line
+}, and
+¯
+Y(t(i)) is the ith
+piece of historical traffic flow data collected at the time t(i),
+which is given by
+¯
+Y (t(i))=[y
+n
+(t(i)),y
+1
+(t(i)−(j+m)·T
+s
+),y
+2
+(t(i)−(j+m)·T
+s
+)
+...,y
+n−1
+(t(i)−(j+m)·T
+s
+) with j=0,1,...,p].
+For t<T
+oﬀ−line
+, the initial NN parameters,
+¯
+W(t), are ini-
+tialized by minimizing the following error function (4), which
+is an average of the absolute errors between real observations
+and estimates
+mine
+MAE
+hist
+parenleftbig
+¯
+W(t),Π
+hist
+(t)
+parenrightbig
+=
+1
+N
+hist
+N
+hist
+summationdisplay
+i=1
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+y
+n
+(t(i))− ˆy
+n
+(t(i))
+y
+n
+(t(i))+∂y
+n
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+¯
+W(t),Π
+hist
+(t)
+(4)
+where y
+n
+(t(i)) is the traffic flow condition collected by the on-
+road sensorD
+n
+at the past timet(i); ˆy
+n
+(t(i))is estimated based
+on (1) with respect to
+¯
+W(t); and ∂y
+n
+is a very small value to
+avoid the denominator to be zero wheny
+n
+(t(i))is equal to zero,
+but ∂y
+n
+is small enough that it does not affect the calculation
+for the mean absolute error.
+B. On-Line Adaption
+For on-line adaption (i.e., t>T
+oﬀ−line
+),
+¯
+W(t) varies by
+adapting m pieces of new traffic flow data, Π
+adapt
+(t), which
+CHAN et al.: INTELLIGENT PARTICLE SWARM OPTIMIZATION FOR SHORT-TERM TRAFFIC FLOW FORECASTING 4717
+are newly captured, whereΠ
+adapt
+(t)={
+¯
+Y(t−i·T
+s
+)withi =
+0,1,...,m and t>T
+oﬀ−line
+}, and
+¯
+Y(t−i·T
+s
+)=
+[y
+n
+(t−i·T
+s
+),y
+1
+(t−(j +m+i)·T
+s
+),y
+2
+(t−(j +m+i)·
+T
+s
+),...,y
+n−1
+(t−(j +m+i)·T
+s
+) with j =0,1,...,p].
+For t>T
+oﬀ−line
+,
+¯
+W(t) is determined by minimizing the
+following error functions (5):
+mine
+MAE
+adapt
+parenleftbig
+¯
+W(t),Π
+adapt
+(t)
+parenrightbig
+=
+1
+m
+m
+summationdisplay
+i=1
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+y
+n
+(t−i·T
+s
+)− ˆy
+n
+(t−i·T
+s
+)
+y
+n
+(t−i·T
+s
+)+∂y
+n
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+vextendsingle
+¯
+W(t),Π
+adapt
+(t)
+(5)
+where y
+n
+(t−i·T
+s
+) is the traffic flow condition captured
+by the on-road sensor D
+n
+at time (t−i·T
+s
+); ˆy
+n
+(t−i·T
+s
+)
+is estimated based on (1) with respect to
+¯
+W(t); and ∂y
+n
+is a very small value to avoid the denominator to be zero
+when ˆy
+n
+(t−i·T
+s
+) is equal to zero, but ∂y
+n
+is small enough
+that it does not affect the calculation for the mean absolute
+error.
+C. Error Function for Both Off-Line Training and
+On-Line Adaption
+For all t, a time-varying error function, J(t),isformu-
+lated by combining the error functions (4) and (5). J(t) is
+denoted by
+minJ(t)=min
+braceleftbigg
+e
+MAE
+hist
+parenleftbig
+¯
+W(t),Π
+hist
+(t)
+parenrightbig
+for t<T
+oﬀ−line
+e
+MAE
+adapt
+parenleftbig
+¯
+W(t),Π
+adapt
+(t)
+parenrightbig
+for t>T
+oﬀ−line
+.
+(6)
+To solve the optimization problem (6), classical tools for
+nonlinear programming such as nonlinear branch-and-bound,
+sequential linearization, and Lagrangian relaxation methods
+can be used. However, their common shortcoming is that they
+cannot cope with significantly nonlinear functions and time-
+varying functions which the error function, J(t), may involve.
+The nonlinear characteristics of traffic flow are caused by the
+drivers’ behaviors or reaction times regarding current traffic
+flow [4]. For example, different drivers have different reaction
+times when having to apply their brakes to stop the vehicle
+when they encounter an obstacle in front. Also, they have differ-
+ent behaviors, when using their accelerators to control their car
+speeds, to match the current traffic flow conditions. Apart from
+this nonlinear characteristic, the time-varying characteristic
+also exists in traffic flow data. It is caused by uncontrollable
+sequences of events for drivers using the roads, and contingent
+incidents on the roads. Also, the configurations of the on-road
+sensor systems are time varying, due to component wear and
+unexpected damages of on-road sensors.
+Therefore, we propose to use the PSO, to solve these opti-
+mization problems, as this method can obtain satisfactory solu-
+tions to such problems, which are nonlinear, and time varying
+[38]. In the following section, an algorithm based on PSO,
+namely IPSO, is developed, to determine the NN parameters,
+¯
+W(t).
+III. IPSO
+In the IPSO, a random initial swarm consisting of N
+s
+par-
+ticles is first created, where the position of the l
+1
+th particle at
+time t, P
+l
+1
+(t), is used to represent the NN parameters,
+¯
+W(t),
+formulated in (2). P
+l
+1
+(t) is denoted as follows:
+P
+l
+1
+(t)=
+parenleftbig
+p
+l
+1
+,1
+(t),p
+l
+1
+,2
+(t),...,p
+l
+1
+,n
+p
+(t)
+parenrightbig
+=
+¯
+W(t)
+=[α
+0
+(t),β
+j
+(t),γ
+j,0
+(t),γ
+j,i,k
+(t),s
+0
+(t),s
+j
+(t),
+s
+j,0
+(t)s
+j,i,k
+(t)
+with i =0,1,...,p;
+j =1,2,...,N
+h
+k =1,2,...,n] (7)
+in which P
+l
+1
+(t) consists of n
+p
+elements, p
+l
+1
+,l
+2
+(t) with l
+2
+=
+1,2,...,n
+p
+; n
+p
+=(1+p)·N
+h
+·n; and p
+l
+1
+,l
+2
+(t) is randomly
+generated within the domain p
+l
+1
+,l
+2
+(t) ∈{p
+min
+...p
+max
+} =
+{−1...1}. Then, each particle, P
+l
+1
+(t), is evaluated based on
+the error function (6), and the error obtained by P
+l
+1
+(t) is de-
+noted by J
+l
+1
+(t). J
+best
+(t) represents the smallest error obtained
+by the best particle in the swarm, which is is denoted by
+J
+best
+(t)= min
+∀l
+3
+∈[1,...,N
+s
+]
+J
+l
+3
+(t) (8)
+where J
+best
+(t)=J
+l
+3
+(t) <J
+l
+4
+(t) for l
+3
+negationslash= l
+4
+. The best particle
+in swarm is denoted by P
+best
+(t), which can obtain the smallest
+error, J
+best
+(t), in the swarm.
+The position of the particle, p
+l
+1
+,l
+2
+(t), is updated based on (9)
+at time t:
+p
+l
+1
+,l
+2
+(t)=p
+l
+1
+,l
+2
+(t−T
+s
+)+v
+l
+1
+,l
+2
+(t) (9)
+where p
+l
+1
+,l
+2
+(t−T
+s
+) is the position of the particle at time, (t−
+T
+s
+), and v
+l
+1
+,l
+2
+(t) is the velocity of the particle at time t. When
+the CPSO [14] is used, the velocity,v
+l
+1
+,l
+2
+(t),ofthel
+2
+th element
+on the l
+1
+th particle at time t is given by
+v
+l
+1
+,l
+2
+(t)=ω(t)·v
+l
+1
+,l
+2
+(t−T
+s
+)+φ
+1
+·r
+1
+(pbest
+l
+1
+,l
+2
+−p
+l
+1
+,l
+2
+(t−T
+s
+))
++φ
+2
+·r
+2
+(gbest
+l
+2
+−p
+l
+1
+,l
+2
+(t−T
+s
+)) (10)
+where pbest
+l
+1
+=[pbest
+l
+1
+,1
+,pbest
+l
+1
+,2
+,...,pbest
+l
+1
+,n
+p
+] is the
+best position of the l
+1
+th particle moved so far, and gbest=
+[gbest
+1
+,gbest
+2
+,...,gbest
+n
+p
+]is the position of the best particle
+among all the particles;r
+1
+andr
+2
+return a uniform random num-
+ber between the range of [0, 1]; φ
+1
+and φ
+2
+are the acceleration
+constants; and ω(t) is the intelligent inertia weight, which is a
+constant between the range of [0.1, 1.1] for all t [13].
+Initial studies of PSO show that the value ofω(t)is important
+to ensure convergent behavior [13]. When ω(t) > 1, v
+l
+1
+,l
+2
+(t)
+increases with respect to time that cause divergent behavior.
+When ω(t) < 0, particles decelerate until their velocities reach
+zero. It has been shown by [5] that a particular set for ω(t), φ
+1
+,
+and φ
+2
+can ensure that PSO can be rapidly converged, if the
+following condition is satisfactory:
+ω(t) > 0.5·(φ
+1
++φ
+2
+)−1. (11)
+As the error function (6) has a time-varying characteristic,
+the landscape and the optima of the error function vary with
+respect to time. Therefore, it is not effective to use the CPSO to
+4718 IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS, VOL. 60, NO. 10, OCTOBER 2013
+solve the time-varying error function (6), as the swarm param-
+eters such as inertia weight in the CPSO is pre-defined based
+on the past experience. Even thought the predefined parameters
+work very well on forecasting future traffic flow conditions
+which have similar characteristic to past traffic flow conditions
+used for training, they may not work effectively on forecasting
+future traffic flow conditions which have different characteristic
+to those past conditions. The pre-defined parameters, which are
+time invariant, may not be appropriate to optimize the time-
+varying error function (6), which varies with respect to time. To
+enhance the performance of the CPSO, the IPSO is proposed
+by adapting the swarm parameters to the time-varying error
+function.
+A. Mechanisms of the IPSO
+For IPSO, the velocity of the element at time t is given by
+v
+l
+1
+,l
+2
+(t)=ω(t)·((1−β(t))·v
+l
+1
+,l
+2
+(t−T
+s
+)+β(t)· ˜v
+l
+1
+,l
+2
+(t−T
+s
+))
++ φ
+1
+·r
+1
+(pbest
+l
+2
+−p
+l
+1
+,l
+2
+(t−T
+s
+))
++ φ
+2
+·r
+2
+(gbest
+l
+2
+−p
+l
+1
+,l
+2
+(t−T
+s
+)) (12)
+where the two components, ω(t) and random velocity compo-
+nent, ˜v
+l
+1
+,l
+2
+(t−T
+s
+), are used to obtain better solutions for the
+time-varying error function (6).
+ω(t) is used to create a dynamical balance between the
+exploration and exploitation characteristics of the IPSO. ω(t)
+changes dynamically by monitoring the error obtained by the
+particles at time t, to dynamically adjust the search capability
+between the exploration and exploitation. A large ω(t) facili-
+tates an exploration which induces the particles to leave their
+current regions and pushes the particles to search in the other
+regions. A small ω(t) facilitates exploitation, which refines the
+best solution of the particles by exploiting a small vicinity
+around this best solution.
+To solve the time-varying error function (6), a large ω(t) is
+required, when the error obtained by the IPSO is high, or the
+error obtained by the IPSO increases. The current traffic flow
+conditions are very different to those of the previous. Thus,
+a large ω(t) is necessary to push the particles to explore the
+searching regions which have not been explored, and are likely
+to produce better solutions with lower forecasting errors. The
+reason is that refining the particles in a searching area with large
+errors does not effectively obtain a significant improvement.
+However, when the error is small, or decreases, a small ω(t)
+is used. The current traffic flow conditions are not significantly
+different to those of the previous. Small ω(t) intends to let the
+particles exploit a small vicinity by refining the positions of
+the particles, as the solutions located by the particles are good
+enough to produce a better. It refines solution with a smaller
+forecasting error.
+To further help the particles to search for good solutions with
+small errors, a random velocity component, ˜v
+l
+1
+,l
+2
+(t−T
+s
+),is
+injected into the l
+2
+th element on the l
+1
+th particle. ˜v
+l
+1
+,l
+2
+(t−T
+s
+)
+is determined based on (13)
+˜v
+i,j
+(t−T
+s
+)=λ·r
+3
+·(p
+max
+−p
+min
+) (13)
+which is randomly generated and λ is between 0 to 1, and r
+3
+∈
+[0 1] is a uniform random number. More random components
+are introduced into the particle element, when large λ is used.
+It intends to adapt traffic conditions which have large time-
+varying dynamics. Small λ intends to adapt those with small
+time-varying dynamics.λ =0.25is used in this research. Thus,
+0.25 of the range of the particle element is used. The resulting
+velocity, v
+l
+1
+,l
+2
+(t), in (10) is determined based on the weighted
+sum of v
+l
+1
+,l
+2
+(t−T
+s
+), and ˜v
+l
+1
+,l
+2
+(t−T
+s
+), where the intelligence
+weight factor, namely β(t), is introduced. β(t) controls the
+amount of random velocity component, which is injected into
+the regular velocity component, to help the particles to escape
+the poor solutions with large errors. A large β(t) is required,
+when the forecasting error obtained by the IPSO is large, or
+the forecasting error obtained by the IPSO increases. Using
+large β(t), the population diversity of the particles increases,
+and it allows the particles to have a greater chance of exploring
+searching areas which have better solutions. A small β(t) is
+used, when the forecasting error obtained by the IPSO is small,
+or the forecasting error obtained by the IPSO decreases. It
+allows the particles to refine their positions, to obtain a better
+solution by exploring search areas which are good enough to
+perform fine tuning.
+However, determining the appropriate ω(t) and β(t) for
+IPSO is not an easy task, as the landscape of the error function
+(6) is related to the traffic flow characteristics which are highly
+nonlinear, complicated, and time varying. It is impractical and
+almost impossible to mathematically model the search process
+of the IPSO, to determine the appropriate ω(t) and β(t), which
+vary with respect to the time-varying traffic flow characteristics.
+As both ω(t) and β(t) can be adjusted based on the linguistic
+understanding for minimizing the errors of traffic flow fore-
+casting, the fuzzy inference system is used. It has rich liter-
+ature in adjusting process parameters for performing process
+optimization. This linguistic understanding helps in the design
+of a fuzzy inference system, to dynamically vary both ω(t)
+and β(t). Determining both ω(t) and β(t) based on the fuzzy
+inference system is discussed in the following Section III-B,
+and the operations of the IPSO are summarized as follows.
+Step 1) t ← 0.
+Step 2) Initialize N
+S
+particles P
+1
+(t),P
+2
+(t),...,P
+N
+s
+(t)
+based on (7).
+Step 3) Evaluate the error J
+l
+1
+(t) of each particle, P
+l
+1
+(t),
+with l
+1
+=1,2,...,N
+s
+based on the time-varying
+error function (6).
+Step 4) Return the best particle, P
+best
+(t), with the smallest
+error, J
+best
+(t), formulated by (8) as the outcome of
+the IPSO at time t.
+Step 5) Incrementtby a sampling time,T
+s
+, i.e.,t ← t+T
+s
+.
+Step 6) Determine intelligence inertia weight, ω(t), and in-
+telligence weight factor, β(t), based on the fuzzy
+inference system discussed in Section III-B.
+Step 7) Generate the random velocity component, ˜v
+l
+1
+,l
+2
+(t−
+T
+s
+), based on (13).
+Step 8) Update the velocity, v
+l
+1
+,l
+2
+(t),ofthel
+1
+th element of
+the l
+2
+th particle based on (12).
+Step 9) Update each particle element p
+l
+1
+,l
+2
+(t) based on (9).
+Step 10) Go to Step 3 if termination condition is not reached.
+Otherwise, terminate.
+CHAN et al.: INTELLIGENT PARTICLE SWARM OPTIMIZATION FOR SHORT-TERM TRAFFIC FLOW FORECASTING 4719
+B. Fuzzy Inference System
+The fuzzy inference system consists of two inputs and two
+outputs. The two outputs are the intelligence inertia weight,
+ω(t), and the intelligence component factor, β(t), which are
+used to governed the velocity of the particle element formulated
+in (12). These two outputs are adapted with respect to the two
+inputs, 1) the smallest error, J
+best
+(t), and 2) the change of the
+smallest errors, ∂J
+best
+(t), which represents the mean differ-
+ence between the smallest errors obtained by the best particles
+at time t and time (t−n
+w
+·T
+s
+). ∂J
+best
+(t) is denoted by
+∂J
+best
+(t)=
+parenleftbig
+J
+best
+(t)−J
+best
+(t−T
+s
+)
+parenrightbig
+. (14)
+When the error obtained by the IPSO is high, or the error
+obtained by the IPSO increases, a largerω(t)is required, to give
+the particles more energy to escape poor solutions with greater
+errors. Therefore, ω(t) is set to large, if J
+best
+(t) is large and
+∂J
+best
+(t)is large. However, when the error is small, or the error
+decreases, a large ω(t) is not needed. Smaller ω(t) is required,
+to fine tune the particles to better solutions with smaller errors.
+Therefore,ω(t)is set to small, ifJ
+best
+(t)is small and∂J
+best
+(t)
+is small. Based on this linguistic understanding regarding ω(t),
+the following two basic principles, P
+1
+and P
+2
+, for determining
+ω(t) are used:
+P
+1
+If J
+best
+(t) is large or ∂J
+best
+(t) is large, ω(t) is large.
+P
+2
+If J
+best
+(t) is small or ∂J
+best
+(t) is small, ω(t) is small.
+When J
+best
+(t) is large or ∂J
+best
+(t) is large, large β(t) is
+required, to inject more random velocity components into the
+particles. With large β(t), the IPSO intends to move the poor
+particles with large errors to good solutions with small errors.
+When J
+best
+(t) is small or ∂J
+best
+(t) is small, a small β(t),is
+needed to refine the particles of the IPSO to slightly better so-
+lutions. Based on this linguistic understanding regarding β(t),
+the following two basic principles, P
+3
+and P
+4
+, for determining
+β(t) are used:
+P
+3
+If J
+best
+(t) is large or ∂J
+best
+(t) is large, β(t) is large.
+P
+4
+If J
+best
+(t) is small or ∂J
+best
+(t) is small, β(t) is small.
+Using the four basic principles, P
+1
+, P
+2
+, P
+3
+, and P
+4
+,
+nine fuzzy rules embedded in the fuzzy inference system are
+developed
+Rulei : If J
+best
+(t)=M
+J
+best
+j
+AND ∂J
+best
+(t)=M
+∂J
+best
+k
+THENω(t)=σ
+¯p(i)
+(t) AND β(t)=χ
+¯p(i)
+(t)
+where i =1,2...,9; M
+J
+best
+1
+, M
+J
+best
+2
+, and M
+J
+best
+3
+repre-
+sent the memberships of “small,” “medium,” and “large”
+with respect to J
+best
+(t), respectively; M
+∂J
+best
+1
+, M
+∂J
+best
+2
+, and
+M
+∂J
+best
+3
+represent the memberships of “small,” “medium,” and
+“large” with respect to ∂J
+best
+(t), respectively; and ¯p(i)=[1+
+floorlefti/3floorright,1+i−floorlefti/3floorright·3]isanarrayregarding thepositionofthe
+fuzzy rule table, of which floorleftxfloorright is defined by the largest integer
+not greater than x.
+As recommended by Eberhart and Y. Shi [13], the range
+of the inertia weight, ω(t), of the PSO is within the range
+between 0.1 and 1.1. Hence, σ
+¯p(i)
+(t) which intends to deter-
+mine ω(t), is divided into three levels, “small,” “medium,” and
+“large,” where “small” is within the range between 0.1 and
+Fig. 3. (a) Fuzzy rule table for σ
+¯p(i)
+(t). (b) Fuzzy rule table for χ
+¯p(i)
+.
+0.3; “medium” is within the range between 0.3 and 0.8; and
+“large” is within the range between 0.8 and 1.1. Also, χ
+¯p(i)
+(t)
+which intends to determine β(t), is divided into three levels,
+“small,” “medium,” and “large”, where β(t) is within the range
+between 0 and 1. “Small” is within the range between 0 and
+0.33. “Medium” is within the range between 0.33 and 0.66.
+“Large” is within the range between 0.66 and 1.0. Fig. 3(a)
+and (b) illustrate the fuzzy rule tables for σ
+¯p(i)
+(t) and χ
+¯p(i)
+(t),
+respectively, which have been implemented in this research.
+The three fuzzy membership functions of J
+best
+(t)
+are denoted by µ
+1
+J
+best
+(J
+best
+(t)), µ
+2
+J
+best
+(J
+best
+(t)) and
+µ
+3
+J
+best
+(J
+best
+(t)) with respect to M
+J
+best
+1
+, M
+J
+best
+2
+and M
+J
+best
+3
+,
+respectively, where M
+J
+best
+1
+M
+J
+best
+2
+and M
+J
+best
+3
+represents the
+“small,” “medium,” and “large” memberships for the errors,
+respectively. The error dominates the “small” membership,
+M
+J
+best
+1
+, when it is around 5%. When the errors are around 20%
+and 35%, they dominate the “medium” membership, M
+J
+best
+2
+,
+and the “large” membership, M
+J
+best
+3
+, respectively. M
+J
+best
+1
+,
+M
+J
+best
+2
+, and M
+∂J
+best
+3
+are represented by the Gaussian form as
+shown in Fig. 4(a).
+Also, the three fuzzy membership functions of ∂J
+best
+(t)
+are denoted by µ
+1
+∂J
+best
+(∂J
+best
+(t)), µ
+2
+∂J
+best
+(∂J
+best
+(t)) and
+µ
+3
+∂J
+best
+(∂J
+best
+(t)) with respect to M
+∂J
+best
+1
+, M
+∂J
+best
+2
+and
+M
+∂J
+best
+3
+, respectively, where M
+∂J
+best
+1
+, M
+∂J
+best
+2
+and M
+∂J
+best
+3
+represent the “Small”, “Medium” and “Large” memberships for
+the changes of errors, respectively. The change of error dom-
+inates the “Small” membership, M
+∂J
+best
+1
+, when the change of
+error is around 4%. When the changes of errors are around 10%
+and 18%, they dominate the “Medium” membership, M
+∂J
+best
+2
+,
+and the “Large” membership, M
+∂J
+best
+3
+, respectively. M
+∂J
+best
+1
+,
+M
+∂J
+best
+2
+, and M
+∂J
+best
+3
+are represented by the Gaussian form as
+illustrated in Fig. 4(b).
+The values of ω(t) and β(t) are given by taking the weighted
+average with respect to the membership functions:
+ω(t)=
+9
+summationdisplay
+i=1
+m
+i
+(t)σ
+¯p(i)
+(t) (15)
+β(t)=
+9
+summationdisplay
+i=1
+m
+i
+(t)χ
+¯p(i)
+(t) (16)
+respectively, where
+m
+i
+(t)=
+µ
+i
+J
+best
+parenleftbig
+J
+best
+(t)
+parenrightbig
+×µ
+i
+∂J
+best
+parenleftbig
+∂J
+best
+(t)
+parenrightbig
+3
+summationtext
+j=1
+3
+summationtext
+k=1
+µ
+j
+J
+best
+(J
+best
+(t))×µ
+k
+∂J
+best
+(∂J
+best
+(t))
+.
+(17)
+4720 IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS, VOL. 60, NO. 10, OCTOBER 2013
+Fig. 4. (a) Membership functions of J
+best
+(t). (b) Membership functions ∂J
+best
+(t).
+Fig. 5. On-road sensor configuration on the Mitchell Freeway.
+IV. TRAFFIC FLOW FORECASTING ON A FREEWAY
+In this section, the effectiveness of the IPSO for developing
+NNs for short-term traffic flow forecasting is evaluated based
+on the traffic flow data collected from a freeway in Western
+Australia.
+First, comparisons between the IPSO and the other algo-
+rithms are utilized based on the traffic flow data captured by
+the on-road sensors, where a traffic jam occurred and none of
+the on-road sensors used for capturing the data is damaged.
+The objective is to evaluate the adaptive capability of the
+IPSO switching from different traffic flow conditions, where
+all on-road sensors are able to work normally. Second, the
+performance of the IPSO is further evaluated based on the
+contingent cases, where some of the on-road sensors used for
+capturing the traffic flow conditions are damaged unexpectedly.
+The objective is to evaluate the adaptive capability of the IPSO
+from a proper on-road sensor configuration to a damaged on-
+road sensor configuration.
+A. Traffic Flow Data
+The traffic flow data was collected by 14 on-road sensors
+(D
+1
+to D
+14
+) installed along the Mitchell Freeway, Western
+Australia, which are illustrated in Fig. 5. Three on-road sensors
+were installed near the off-ramp, near the on-ramp, as well
+as between the off-ramp and on-ramp, for the Reid Highway
+(D
+1
+to D
+3
+), Karrinyup Road (D
+6
+to D
+8
+), Cedric Street (D
+9
+to
+D
+11
+), and Hutton Street (D
+12
+toD
+14
+), respectively. On Erindale
+Road, two on-road sensors (D
+4
+and D
+5
+) were installed near
+the off-ramp and near the on-ramp. The sampling time for
+all on-road sensors was half minute (or 30 s). The distance
+between Reid Highway and Hutton Street is about 7 km, where
+the speed limit for these sections of the Mitchell Freeway is
+100 km/h. The NNs were developed to forecast future traffic
+flow conditions with five sampling times ahead.
+The traffic flow data were collected over the 2-h peak traffic
+period (7:30–9:30 AM) on the Monday, which is the busiest
+business day of the week. All these traffic flow data were
+collected from the six weeks including weeks 6, 7, 8, 9, 11,
+and 12 in 2009. The proposed algorithm was evaluated by two
+different sets of training data, namely large training set and
+small training set, which involve larger and smaller numbers
+of training data, respectively.
+For the large training set, more training data were used for
+developing the NNs. The data collected from the first five
+weeks, weeks 6 to 9 and week 11, were used for training the
+NNs. Hence, 1200 pieces of data were used for training. For the
+small training set, less training data were used for developing
+the NNs. The data collected from weeks 6 to 9 were used
+as the training data. Hence, there were 960 pieces of training
+data. The second sub-set of traffic flow data, namely test data,
+collected from week 12, was used to evaluate the generalization
+capability of the developed NNs. Hence, 240 pieces of traffic
+flow data were used to validate the developed NNs.
+B. Tested Algorithms
+The following parameters were used in the IPSO: both the
+acceleration constants φ
+1
+and φ
+2
+were set at 2.05, and the max-
+imum velocity v
+max
+was 0.2, which can be found in [22], [23];
+the number of particles in the swarm was 50; The specific
+number of hidden nodes, N
+h
+, used depends on the particular
+problem. However, no well-defined algorithm exists for deter-
+mining the optimal N
+h
+. As determining the optimal number
+of hidden nodes is not the goal of this research, we used the
+one recommended by Mirchandani and Cao [36], where N
+h
+≈
+log
+2
+(T) with T be the number of training data. For both large
+and small training sets, N
+h
+=10were used, where T are equal
+to 1200 and 960 for large training set and for small training set,
+respectively, and 10 ≈ log
+2
+(1200) ≈ log
+2
+(960).
+The termination conditions can be divided into two: 1) if
+t<T
+oﬀ−line
+, the IPSO terminates, until the training errors are
+below 10%; 2) if t>T
+oﬀ−line
+, the IPSO terminates, until the
+on-road sensors stop capturing the traffic flow data for the
+CHAN et al.: INTELLIGENT PARTICLE SWARM OPTIMIZATION FOR SHORT-TERM TRAFFIC FLOW FORECASTING 4721
+IPSO. The performance of the IPSO is compared with the
+following population-based stochastic algorithms.
+a) CPSO [22]: the mechanisms and the parameters used in
+the CPSO are identical to those of the IPSO, except that
+IPSO utilizes (12) to update the velocity of each element
+of the particle, and CPSO utilizes (10) to update the
+velocity.
+b) Advanced PSO (APSO) [28] is identical to the CPSO ex-
+cept that APSO utilizes another mechanism for updating
+thepositions of theparticles. Itincludes theworst particle,
+to update the velocity of each element of the particle,
+while both CPSO and IPSO include only the best particle.
+We compare the IPSO with APSO, because APSO can
+obtain very good results when adapting the parameters of
+the fuzzy NNs for on-line control of power converter [28].
+c) Improved genetic algorithm [26] namely IGA: which has
+been used to optimize the NNs, where the structure of
+the NNs is identical to the one implemented by IPSO.
+IGA utilizes two genetic operations, namely improved
+mutation and improved crossover, which outperforms
+several genetic algorithms developed for optimizing the
+generalization capability of the NNs [26].
+Apart from those algorithms, two recent evolutionary
+algorithms [49], which have been developed for generat-
+ing NNs for traffic flow forecasting, were used for com-
+paring with the IPSO. The two evolutionary algorithms
+are described in the following:
+d) First version of Vlahogianni’s genetic algorithm namely
+VGA-I: The NNs are trained with Levenberg–Marquardt
+(LM) algorithm [3], [16] using the training data. The
+genetic algorithm was used for determining the param-
+eters of the LM algorithm, namely step size for training
+the NNs, training momentum, and the number of hidden
+nodes of the NNs.
+e) Second version of Vlahogianni’s genetic algorithm
+namely VGA-II: The NNs are trained with LM algorithm
+[16] using the training data, where the adaptive step size
+was used for training the NNs. The genetic algorithm was
+used for determining the optimal number of hidden nodes
+of the NNs.
+Both VGA-I and VGA-II only use the training data to
+develop the NNs for traffic flow forecasting. The parameters
+and the configurations of the NNs are kept unchanged with
+respect to the newly captured data after t>T
+oﬀ−line
+. Hence,
+the developed NN does not involve adaption with newly cap-
+tured data. By comparing both VGA-I and VGA-II and the
+other algorithms involved adaption, the differences between the
+algorithms involved no adaption, and those involved adaption
+can be indicated.
+The PSO parameters including acceleration constants and
+inertia weight used in CPSO and APSO are the same as
+those used in [13] and [28], respectively. The GA parameters
+including mutation rate and crossover rate used in IGA, VGA-I,
+and VGA-II are same as those used in [26]. To make a fair com-
+parison, the computational effects used in all these population-
+based stochastic algorithms, IPSO, CPSO, APSO, IGA, VGA-I,
+and VGA-II, are identical. The number of iterations was pre-
+defined as 200, and the population size was 50, when t<
+T
+oﬀ−line
+.
+C. Simulation Results
+After consulting with the engineering personnel from Main-
+road, Western Australia (which supporting this research), the
+on-road sensors installed at some particular locations are not
+likely to work properly in very poor weather conditions such as
+rainstorms or floods. Hence, the following two contingencies
+were considered:
+Contingency 1: The three on-road sensors installed at Hutton
+Street cannot work properly, and no signal can be provided
+by the three on-road sensors, from 8:20 to 10:00 A.M.
+Contingency 2: The three on-road sensors installed at Kar-
+rinyup Road cannot work properly, and they can generate
+only a random white noise signal of a value between zero
+and a hundred, from 9:00 to 10:00 A.M.
+Using these two contingencies, the following four cases were
+built:
+Case 1) traffic flow forecasting without any damaged on-
+road sensors;
+Case 2) traffic flow forecasting under contingency 1 consid-
+ered only;
+Case 3) traffic flow forecasting under contingency 2 consid-
+ered only; and
+Case 4) traffic flow forecasting under both contingency 1
+and contingency 2 considered.
+Mean absolute error was used to evaluate the generalization
+capabilities of the NNs.
+MAE =
+1
+m
+summationtext
+m
+i=1
+|y
+14
+(i·T
+s
+)− ˆy
+14
+(i·T
+s
+)|
+y
+14
+(i·T
+s
+)
+·100% (18)
+y
+14
+(i·T
+s
+) is the ith test data captured at the on-ramp of Hutton
+Street, at time (i·T
+s
+);ally
+14
+(i·T
+s
+) are larger than zero;
+ˆy
+14
+(i·T
+s
+)is the estimate of traffic flow condition at the on-road
+sensor, D
+14
+, which is forecast by the NNs, and the traffic flow
+data were captured between time, (i−m−p)·T
+s
+, to time,
+(i−m)·T
+s
+, with p =10and m =5.
+All these algorithms were implemented using Matlab 7.7
+in a PC which has a CPU of Intel Core2 Duo 2.66 GHz,
+and a memory of 7.99 GB. As the algorithms are stochastic
+algorithms, different results can be obtained with different runs.
+Therefore, CPSO, APSO, IPSO, CGA, VGA-I, and VGA-II
+were run for 30 times, and the results of the 30 runs were
+recorded. Table I shows the results obtained by the algorithms
+for large training set. The average of MAE and variance of
+MAE among the 30 runs of the algorithms are shown. For
+case 1, the table shows that the averages of mean test errors
+obtained by VGA-I and VGA-II, which involved no adaption
+of newly captured traffic flow data, were poorer than those
+of CPSO, APSO, IPSO, and CGA, which involved adaption.
+For cases 2, 3, and 4, similar results can be illustrated that
+the results obtained by CPSO, APSO, IPSO, and CGA are
+better than those obtained by VGA-I and VGA-II. These results
+clearly demonstrate the effectiveness of the algorithms involved
+adaption of newly captured traffic flow data. Also, among the
+4722 IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS, VOL. 60, NO. 10, OCTOBER 2013
+TABLE I
+RESULTS OBTAINED BY THE ALGORITHMS USING LARGE TRAINING SET
+four algorithms involved adaption, the results obtained by the
+IPSO are generally better than CPSO, APSO, and CGA.
+In addition, thet-test[7] was used to evaluate the significance
+of the hypothesis that the sample means of the test errors
+obtained by the proposed IPSO are smaller than those obtained
+by the other algorithms (CPSO, APSO, IPSO, CGA, VGA-I,
+and VGA-II). The t-values between IPSO and the other algo-
+rithms are also shown in Table I. Based on the t-distribution
+table, if thet-value is higher than 1.699, the significance is 95%
+confidence, which means that the test errors obtained by the
+IPSO are smaller than those trained by the other algorithm with
+95% confidence level. The t-value can be determined by
+t-value =
+µ
+2
+−µ
+1
+radicalbig
+σ
+2
+2
+/N
+2
++σ
+2
+1
+/N
+1
+where µ
+1
+is the mean test error obtained by the IPSO and µ
+2
+is the one for the other compared algorithm; σ
+2
+1
+is the variance
+of test errors obtained by the IPSO, and σ
+2
+2
+is the one for the
+other compared algorithm; N
+1
+and N
+2
+are the number of tests
+performed by IPSO and the other compared algorithm, respec-
+tively. In general, the results indicate that the significances of
+differences between IPSO to the non-adaptive algorithms (i.e.,
+VGA-I and VGA-II) are large than those between IPSO to
+the adaptive algorithms (i.e., CPSO, APSO, and CGA). This
+finding illustrates the effectiveness of the adaptive algorithm. In
+general, IPSO can obtain significantly better results than those
+obtained by all other tested algorithms. Hence, the effectiveness
+of the IPSO can be further demonstrated.
+Table II shows the results obtained by the algorithms which
+used small training set. In general, similar results can be found
+as those that used large training set. The results obtained by
+the algorithms involved adaption are generally better than those
+involved no adaption. Also, the t-test shows that IPSO can
+obtain significantly better results than those obtained by the
+other tested algorithms.
+TABLE II
+RESULTS OBTAINED BY THE ALGORITHMS USING SMALL TRAINING SET
+Fig. 6. Computational time used on each algorithm.
+Also, Fig. 6 shows the computational time used by each
+algorithm for each iteration to adapt the NN parameters. It
+shows that the computational time taken for each iteration when
+using the population-based stochastic methods (CPSO, APSO,
+IPSO, and IGA) is about 1 to 2.5 s, while the computational
+time taken by the adapt-LM is less than 0.5 s. Therefore, the
+computational time taken by the adapt-LM is less than that
+taken when using the population-based stochastic methods.
+Even if the computational time taken by the adapt-LM is
+much less than that of the population-based stochastic methods,
+the accuracies in term of traffic flow forecasting conditions
+achieved by the adapt-LM are poorer than those obtained by
+the population-based stochastic methods. As accuracy in traffic
+flow forecasting is important, one may still use the population-
+based stochastic methods to conduct traffic flow forecasting.
+Fig. 6 also shows that the computational time taken for all
+population-based stochastic methods, including the proposed
+IPSO, is much less than the sampling time of 30 s. Therefore,
+IPSO is implementable, to adapt traffic flow data which is
+captured with the sample time of 30 s. The sample time of IPSO
+can be set smaller, if the computational time taken for the IPSO
+for one iteration is smaller. To achieve this, the following two
+CHAN et al.: INTELLIGENT PARTICLE SWARM OPTIMIZATION FOR SHORT-TERM TRAFFIC FLOW FORECASTING 4723
+Fig. 7. Forecasting results for Case 1.
+approaches can be used: 1) the IPSO can be implemented on
+a more powerful microprocessor, to reduce the computational
+time; 2) the IPSO is currently implemented by Matlab, which is
+a high level programming language. If the IPSO is implemented
+by a lower level programming language, the computational time
+required by the IPSO is smaller, and thus, shorter sampling
+times can be used.
+For Case 1, the simulation results for Monday (week 12)
+in terms of average speeds of vehicles are shown in Fig. 7,
+when no contingency has occurred. It shows that from the 40th
+sample to the 150th sample (about 7:51–8:45 A.M.), the average
+speeds of vehicles were about 50 km/h, which is far below the
+speed limit. Hence, the traffic flow was congested, and there
+was a traffic jam during that time. From the 170th sample to
+the 210th sample (about 8:55–9:15 A.M.), the average speeds
+of vehicles are about 90 km/h, which are nearer the speed limit.
+Hence, the traffic flow was smoother, and there was no traffic
+jam during that period of time. The data being investigated
+contain traffic jam conditions. Fig. 7 shows two results: the
+upper one shows the forecasting obtained by the NN without
+adaption, which is developed based on non-adapt-LM; and the
+lower one shows the forecasting obtained by the adaptive NN,
+which was generated by the IPSO. By comparing the results
+obtained by the IPSO and the non-adapt-LM, we can see that
+the better average speed estimates are produced by the IPSO
+rather than by the non-adapt-LM. In general, the results forecast
+by IPSO are more accurate than those forecast by non-adapt-
+LM. Therefore, the IPSO can obtain more accurate results for
+forecasting traffic flow conditions.
+Figs. 8–10 show the results for Case 2, Case 3, and Case 4,
+respectively, which involve the contingencies. For Case 2, the
+simulation results are shown in Fig. 8, where the on-road
+sensors, D
+12
+, D
+13
+, and D
+14
+, were damaged at 8.20 (at the
+100th sample time). It can be clearly observed that relatively
+larger errors between the actual traffic flow and the estimated
+traffic flow were produced, when the non-adapt-LM was used
+to perform the forecasting. Hence, the non-adapt-LM performs
+poorly, and only unacceptable estimates are generated. When
+the adaptive NN developed by the IPSO was used, relatively
+smaller errors occurred. For Case 3, the on-road sensors, D
+6
+,
+D
+7
+, and D
+8
+, were damaged at 9.00 (at the 160th sample time).
+Fig. 9 shows similar results in that relatively smaller errors
+Fig. 8. Forecasting results for Case 2.
+Fig. 9. Forecasting results for Case 3.
+Fig. 10. Forecasting results for Case 4.
+occurred, when the NNs developed by the IPSO were used to
+perform the forecasting. Case 4 is the situation where there
+was the most serious damage, since the on-road sensors, D
+12
+,
+D
+13
+and D
+14
+, as well as the on-road sensors, D
+6
+, D
+7
+, and
+D
+8
+, were damaged at 8.20 (at the 100th sample time), as well
+as at 9.00 (at the 160th sample time), respectively. It can be
+observed from Fig. 10 that a significantly greater forecasting
+error was produced by non-adapt-LM, while a much smaller
+forecasting error was produced by the IPSO. Although, small
+impulses with relatively large error were produced by the IPSO
+4724 IEEE TRANSACTIONS ON INDUSTRIAL ELECTRONICS, VOL. 60, NO. 10, OCTOBER 2013
+at the 100th sampling time and the 160th sample time, after
+the contingencies occurred, the forecasting errors immediately
+decreased to low levels after a short time. Therefore, these
+simulation results demonstrate the effectiveness of the IPSO
+since it can adapt to changing on-road sensor configurations,
+which are likely to be damaged from time to time.
+V. C ONCLUSION
+In this paper, an IPSO algorithm is proposed for the develop-
+ment of short-term traffic flow predictors, to tackle the time-
+varying assumptions underlying the currently used methods,
+where: 1) the characteristics of current data captured by on-
+road sensors are assumed to be time invariant with respect to
+those of the historical data which was used to developed short-
+term traffic flow predictors; and 2) the configuration of the on-
+road sensor systems is assumed to be time invariant. By tackling
+these two time-varying assumptions, the IPSO is developed by
+integrating the mechanisms of PSO, NN and fuzzy inference
+systems, to develop short-term traffic flow predictors, which
+can adapt to the time-varying traffic flow data and the time-
+varying configurations of on-road sensor systems.
+In the IPSO, the particle in the swarm is used to represent the
+NN with a flexible structure, to forecast short-term traffic flow,
+without these two time-invariant assumptions. Then, the IPSO
+uses the mechanisms of particle movements, to locate with the
+time-varying optimum of the short-term traffic flow predictor.
+To further enhance the adaptive capability of the IPSO, the
+fuzzy inference system is used to inject activating components
+into the particles, to let the particles search for good solu-
+tions when the traffic flow accuracy obtained by the IPSO
+is low.
+The effectiveness of the IPSO was evaluated by applying it to
+the development of short-term traffic flow predictors to forecast
+traffic flow conditions on a section of freeway in Western
+Australia, whose traffic flow data were captured on-line by
+an on-road sensor system consisting of 14 on-road sensors.
+The four cases, included one with traffic congestion, and three
+which involved on-road sensors damaged at different times and
+different locations, were considered. The forecasting results
+obtained by the short-term traffic flow predictor developed by
+IPSO were more accurate than those obtained by the other
+tested algorithms: the LM approach, the genetic algorithm, and
+PSO approaches taken from the recent literature. These results
+clearly demonstrated the effectiveness of the proposed IPSO.
+Future work will be carried out by further enhancing and
+evaluating the effectiveness of the proposed IPSO. Thus, it can
+be divided into two categories: 1) incorporation with the other
+heuristic algorithms in order to enhance the effectiveness of
+the proposed IPSO for short-term traffic flow forecasting. In-
+vestigation of the effectiveness of the incorporating ant colony
+algorithm, artificial immune systems, or bee colony algorithm
+into IPSO will be conducted; and 2) as manufacturing processes
+which involve control operations by sensor data are common
+[2], [6], [24], the effectiveness of the IPSO can be further
+evaluated by applying it to control manufacturing processes
+which are operated with sensor systems.
+ACKNOWLEDGMENT
+The authors wish to express their sincere thanks to Steve
+S. H. Ling and Jaipal Singh for many useful discussions and
+valuable suggestions. They would also like to acknowledge
+their very useful comments for this research.
+REFERENCES
+[1] A. Alessandri, R. Bolla, M. Gaggero, and M. Repetto, “Modeling and
+identification of nonlinear dynamics for freeway traffic by using informa-
+tion from a mobile cellular network,” IEEE Trans. Control Syst. Technol.,
+vol. 17, no. 4, pp. 952–959, Jul. 2009.
+[2] R. Antonello, R. Oboe, L. Prandi, and F. Biganzoli, “Automatic mode
+matching in MEMS vibrating gyroscopes using extremum-seeking con-
+trol,” IEEE Trans. Ind. Electron., vol. 56, no. 10, pp. 3880–3891,
+Oct. 2009.
+[3] J. Arif, N. R. Chaudhuri, S. Ray, and B. Chaudhuri, “Online Levenberg-
+Marquardt algorithm for neural network based estimate and control of
+power systems,” in Proc.Int. Joint Conf. Neural Netw., 2009, pp. 199–206.
+[4] A. Aw and M. Rascle, “Resurrection of “second order” models of traffic
+flow,” SIAM J. Appl. Math., vol. 60, no. 3, pp. 916–938, 2000.
+[5] F. Bergh and A. P. Engelbrecht, “A study of particle swarm opti-
+mization particle trajectories,” Inf. Sci., vol. 176, no. 8, pp. 937–971,
+Apr. 2006.
+[6] F. Bonaccorso, L. Cantelli, and G. Muscato, “An arc welding robot
+control for a shaped metal deposition plant: Modular software interface
+and sensors,” IEEE Trans. Ind. Electron., vol. 58, no. 8, pp. 3126–3132,
+Aug. 2011.
+[7] G. E.-P. Box, J. S. Hunter, and W. G. Hunter, Statistics for Experiments:
+Design, Innovation, and Discovery., 2nd ed. New York: Wiley, 2005.
+[8] K. Y. Chan, T. S. Dillon, and C. K. Kwong, “Polynomial modelling for
+time-varying systems based on a particle swarm optimization algorithm,”
+Inf. Sci., vol. 181, no. 9, pp. 1623–1640, May 2011.
+[9] C. Chen, B. Zhang, and G. Vachtsevanos, “Machine condition prediction
+based on adaptive neuro-fuzzy and high-order particle filtering,” IEEE
+Trans. Ind. Electron., vol. 58, no. 9, pp. 4353–4364, Sep. 2011.
+[10] G. A. Davis and N. L. Nihan, “Nonparametric regression and short-term
+freeway traffic forecasting,” J. Transp. Eng., vol. 177, no. 2, pp. 178–188,
+Mar./Apr. 1991.
+[11] H. Dia, “An object-oriented neural network approach to short-term
+traffic forecasting,” Eur. J. Oper. Res., vol. 131, no. 2, pp. 253–261,
+Jun. 2001.
+[12] M. Dougherty, “A review of neural networks applied to transport,” Transp.
+Res. C, Emerging Technol., vol. 3, no. 4, pp. 247–260, Aug. 1995.
+[13] R. C. Eberhart and Y. Shi, “Comparison between genetic algorithms
+and particle swarm optimization,” in Evolutionary Programming VII,
+vol. 1447. New York: Springer-Verlag, 1998, pp. 611–616.
+[14] R. C. Eberhart and Y. Shi, “Comparing inertia weights and constric-
+tion factors in particle swarm optimization,” in Proc. IEEE Congr. Evol.
+Comput., San Diego, CA, 2000, pp. 84–88.
+[15] Y. Gao and M. J. Er, “NARMAX time series model prediction: Feedfor-
+ward and recurrent fuzzy neural network approaches,” Fuzzy Sets Syst.,
+vol. 150, no. 2, pp. 331–350, Mar. 2005.
+[16] M. T. Hagan, H. B. Demuth, and M. H. Beale, Neural Network Design.
+Boston, MA: PWS Pub, 1996.
+[17] W. C. Hong, P. F. Pai, S. L. Yang, and C. Y. Lai, “Continuous ant colony
+optimization in a SVR urban traffic forecasting model,” in Proc. 9th Int.
+Work Conf. Artif. Neural Netw., 2007, vol. 4507, pp. 765–773.
+[18] W. C. Hong, Y. Dong, F. Zheng, and C. Y. Lai, “Forecasting urban traffic
+flow by SVR with continuous ACO,” Appl. Math. Model., vol. 35, no. 3,
+pp. 1282–1291, Mar. 2011.
+[19] W. C. Hong, “Traffic flow forecasting by seasonal SVR with chaotic
+simulated annealing algorithm,” Neurocomputing, vol. 74, no. 12/13,
+pp. 2069–2107, Jun. 2011.
+[20] W. C. Hong, “Application of seasonal SVR with chaotic immune algo-
+rithm in traffic flow forecasting,” Neural Comput. Appl., vol. 21, no. 3,
+pp. 583–593, Apr. 2012.
+[21] G. N. Karystinos and D. A. Pados, “On overfitting, generalization, and
+randomly expanded training sets,” IEEE Trans. Neural Netw., vol. 11,
+no. 5, pp. 1050–1057, Sep. 2000.
+[22] J. Kennedy and R. Eberhart, “Particle swarm optimization,” in Proc. 30th
+IEEE Conf. Decision Control, 1995, vol. 4, pp. 1942–1948.
+[23] J. Kennedy and R. C. Eberhart, Swarm Intelligence. San Mateo, CA:
+Morgan Kaufmann, 2001.
+CHAN et al.: INTELLIGENT PARTICLE SWARM OPTIMIZATION FOR SHORT-TERM TRAFFIC FLOW FORECASTING 4725
+[24] J. Kjellsson, A. E. Vallestad, R. Steigmann, and D. Dzung, “Integration
+of a wireless I/O interface for PROFIBUS and PROFINET for factory
+automation,” IEEE Trans. Ind. Electron., vol. 56, no. 10, pp. 4279–4287,
+Oct. 2009.
+[25] C. Ledoux, “An urban traffic flow model integrating neural network,”
+Transp. Res. C, Emerging Technol., vol. 5, no. 5, pp. 287–300, Oct. 1997.
+[26] F. H. F. Leung, H. K. Lam, S. H. Ling, and P. K. S. Tam, “Tuning
+of the structure and parameters of a neural network using an improved
+genetic algorithm,” IEEE Trans. Neural Netw., vol. 14, no. 1, pp. 79–88,
+Jan. 2003.
+[27] F. Liang, “Bayesian neural networks for nonlinear time series forecast-
+ing,” Stat. Comput., vol. 15, no. 1, pp. 13–29, Jan. 2005.
+[28] F. J. Lin, L. T. Teng, J. W. Lin, and S. Y. Chen, “Recurrent functional
+link based fuzzy-neural-network-controlled induction-generator system
+using improved particle swarm optimization,” IEEE Trans. Ind. Electron.,
+vol. 56, no. 5, pp. 1557–1577, May 2009.
+[29] Y. X. Liao, J. H. She, and M. Wu, “Integrated hybrid-PSO and fuzzy-NN
+decoupling control for temperature of reheating furnace,” IEEE Trans.
+Ind. Electron., vol. 56, no. 7, pp. 2704–2714, Jul. 2009.
+[30] Q. Li, W. Chen, Y. Wang, S. Liu, and J. Jia, “Parameter identification for
+PEM fuel cell mechanism model based on effective informed adaptive
+particle swarm optimization,” IEEE Trans. Ind. Electron., vol. 58, no. 6,
+pp. 2410–2419, Jun. 2011.
+[31] F. J. Lin, L. T. Teng, J. W. Lin, and S. Y. Chen, “Recurrent functional-
+link-based fuzzy-neural-network controlled induction generator system
+using improved particle swarm optimization,” IEEE Trans. Ind. Electron.,
+vol. 56, no. 5, pp. 1557–1577, May 2009.
+[32] C. H. Lu and C. C. Tsai, “Adaptive predictive control with recurrent neural
+network for industrial processes: An application to temperature control of
+a variable-frequency oil cooling machine,” IEEE Trans. Ind. Electron.,
+vol. 55, no. 3, pp. 1366–1375, Mar. 2008.
+[33] C. H. Lu, “Design and application of stable predictive controller using
+recurrent wavelet neural networks,” IEEE Trans. Ind. Electron., vol. 56,
+no. 9, pp. 3733–3742, Sep. 2009.
+[34] C. H. Lu, “Wavelet fuzzy neural networks for identification and predictive
+control of dynamic systems,” IEEE Trans. Ind. Electron., vol. 58, no. 7,
+pp. 3046–3058, Jul. 2011.
+[35] P. A. Mastorocostas and J. B. Theocharis, “An orthogonal least-squares
+method for recurrent fuzzy-neural modeling,” Fuzzy Sets Syst., vol. 140,
+no. 2, pp. 285–300, Dec. 2003.
+[36] G. Mirchandani and W. Cao, “On hidden nodes for neural nets,” IEEE
+Trans. Circuits Syst., vol. 36, no. 5, pp. 661–664, May 1989.
+[37] I. Okutani and Y. J. Stephanedes, “Dynamic prediction of traffic volume
+through Kalman filtering theory,” Transp. Res. B, Methodol., vol. 18,
+no. 1, pp. 1–11, Feb. 1984.
+[38] K. E. Parsopoulos and M. N. Vrahatis, “On the computation of all global
+minimizers through particle swarm optimization,” IEEE Trans. Evol.
+Comput., vol. 8, no. 3, pp. 211–224, Jun. 2004.
+[39] L. Prechelt, “Automatic early stopping using cross validation: Quantifying
+the criteria,” Neural Netw., vol. 11, no. 4, pp. 761–777, Jun. 1998.
+[40] C. Quek, M. Pasquier, and B. B. S. Lim, “POP-TRAFFIC: A novel fuzzy
+neural approach to road traffic analysis and prediction,” IEEE Trans.
+Intell. Transp. Syst., vol. 7, no. 2, pp. 133–146, Jun. 2006.
+[41] P. Ross, “Exponential filtering of traffic data,” Transp. Res. Rec., no. 869,
+pp. 43–49, 1982.
+[42] B. L. Smith and M. J. Demetsky, “Traffic flow forecasting: Comparison
+of modeling approaches,” J. Transp. Eng., vol. 123, no. 4, pp. 261–266,
+Jul./Aug. 1997.
+[43] B. L. Smith, B. M. Williams, and R. K. Oswald, “Comparison of paramet-
+ric and nonparametric models for traffic flow forecasting,” Transp. Res. C,
+Emerging Technol., vol. 10, no. 4, pp. 303–321, Aug. 2002.
+[44] D. Srinivasan, C. W. Chan, and P. G. Balaji, “Computational in-
+telligence based congestion prediction for a dynamic urban street
+network,” Neurocomputing, vol. 72, no. 10–12, pp. 2710–2716,
+Jun. 2009.
+[45] A. Stathopoulos, L. Dimitriou, and T. Tskeris, “Fuzzy modeling approach
+for combined forecasting of urban traffic flow,” Comput.-Aided Civil In-
+frastr. Eng., vol. 23, no. 7, pp. 521–535, Oct. 2008.
+[46] M. C. Tan, S. C. Wong, J. M. Xu, Z. R. Guan, and P. Zhang, “An aggre-
+gation approach to short term traffic flow prediction,” IEEE Trans. Intell.
+Transp. Syst., vol. 10, no. 1, pp. 60–69, Mar. 2009.
+[47] K. S. Tang, K. F. Man, Z. F. Liu, and S. Kwong, “Minimal fuzzy member-
+ships and rules using hierarchical genetic algorithms,” IEEE Trans. Ind.
+Electron., vol. 45, no. 1, pp. 162–169, Feb. 1998.
+[48] Y. Wang, M. Papageorgiou, and A. Messmer, “A real-time freeway
+network traffic surveillance tool,” IEEE Trans. Control Syst. Technol.,
+vol. 14, no. 1, pp. 18–32, Jan. 2006.
+[49] E. I. Vlahogianni, M. G. Karlaftis, and J. C. Golias, “Optimized and
+meta-optimized neural networks for short-term traffic flow prediction: A
+genetic approach,” Transp. Res. C, Emerging Technol., vol. 13, no. 3,
+pp. 211–234, Jun. 2005.
+[50] B. M. Williams, P. K. Durvasula, and D. E. Brown, “Urban freeway traffic
+flow prediction: Application of seasonal autoregressive integrated moving
+average and exponential smoothing models,” Transp. Res. Rec., no. 1644,
+pp. 132–141, 1998.
+[51] H. Yin, S. C. Wong, J. Xu, and C. K. Wong, “Urban traffic flow predic-
+tion using a fuzzy-neural approach,” Transp. Res. C, Emerging Technol.,
+vol. 10, no. 2, pp. 85–98, Apr. 2002.
+[52] Z. H. Zhan, J. Zhang, and H. S. H. Chung, “Adaptive particle swarm
+optimization,” IEEE Trans. Syst., Man, Cybern. B, Cybern., vol. 39, no. 6,
+pp. 1362–1381, Dec. 2009.
+[53] R. J. Wai, J. D. Lee, and K. L. Chuang, “Real-time PID control strategy
+for Maglev transportation system via particle swarm optimization,” IEEE
+Trans. Ind. Electron., vol. 58, no. 2, pp. 629–646, Feb. 2011.
+Kit Yan Chan (M’11) received the M.Phil. degree
+in electronic engineering from The City University
+of Hong Kong, Hong Kong, in 2003, and the Ph.D.
+degree in computing from London South Bank Uni-
+versity, London, U.K., in 2006.
+After the Ph.D. study, he worked as a Postdoctoral
+Research Fellow in the Department of Industrial and
+Systems Engineering, The Hong Kong Polytechnic
+University, Hong Kong, until 2009. Currently, he is
+a Senior Research Fellow in the Department of Elec-
+trical and Computer Engineering, Curtin University,
+Perth, Australia. He has published 40 scientific papers in international journals
+and two research monographs. His research interests include computational
+intelligence and its applications to new product design, manufacturing process
+design, speech recognition, and traffic flow forecasting.
+Tharam S. Dillon (M’74–SM’87–F’98–LF’10)
+received the Ph.D. degree in electrical engineering
+from Monash University, Australia.
+He is a Professor with the Department of Com-
+puter Science and Computer Engineering, La Trobe
+University, Melbourne, Australia. He has published
+more than 750 papers published in international
+conferences and journals and is the author of five
+books and has another five edited books. His current
+research interests include Web semantics, ontologies,
+Internet computing, e-commerce, hybrid neurosym-
+bolic systems, neural nets, software engineering, database systems, and data
+mining. He is the Editor-in-Chief of the International Journal of Computer Sys-
+tems Science and Engineering as well as the Engineering Intelligent Systems.
+Prof. Dillon is a Fellow of the ACS and IE (Aust). He is the Head of
+the IFIP International Task Force WG2.12/24 on Semantic Web and Web
+Semantics, the Chairman of the IFIP WG12.9 on computational intelligence,
+the IEEE/IES Technical Committee on Industrial Informatics, and the IFIP
+Technical Committee 12 on Artificial Intelligence.
+Elizabeth Chang (M’02–SM’07) received the
+Bachelor’s degree in computer science from Beijing
+University, Beijing, China, in 1985, and the Master’s
+and Ph.D. degrees in computer science from La
+Trobe University, Melbourne, Australia, in 1991 and
+1996, respectively.
+Currently, she is a Professor at the School
+of Information Systems, Curtin University, Perth,
+Australia. She has coauthored three books and has
+published over 350 scientific papers as book chapters
+and journals, and conferences Currently, she is hold-
+ing six ARC Grants and a Tier 1 Center of Excellence grant and obtained cash
+from ARC, industry partners as well as Research Center of Excellence funds
+of over $5 million for 2002–2011. Her research interests include ontology and
+multi-agent systems, data mining for business intelligence, trust, security and
+risk in e-Business, XML, Web Services, P2P for collaborative environments,
+web engineering, IT for business and commerce, IT for health informatics, and
+IT for education.
+
